@@ -8,7 +8,6 @@ library("psych")
 library("factoextra")
 library("scatterplot3d")
 
-data_xlsx <- read_excel("Tarea_Glaucoma_DB.xlsx")
+datos <- read_excel("Tarea_Glaucoma_DB.xlsx")
+summary(datos)
 
-data("RBGlass1")
-class("Tarea_Glaucoma_DB")

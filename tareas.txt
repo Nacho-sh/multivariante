@@ -1,0 +1,2 @@
+Describir las variables que tiene la base de datos (datos cualitativos, datos cuantitativos... (vienen en descripciones al pulsar sobre la variable en Rstudio))
+
