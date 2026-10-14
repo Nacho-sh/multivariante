@@ -35,8 +35,11 @@ summary(SLT)        # comprobamos los NA de cada columna
 # Variables cuantitativas (posiciones tras omitir la fecha)
 quant <- SLT[, c(2, 5:8, 10:16)]
 
-# Matriz de varianzas y covarianzas
-cov(quant, use = "pairwise.complete.obs")
-
 # Para compararla con tu script, la de correlaciones igual:
 cor(quant, use = "pairwise.complete.obs")
+
+evolucion_pio <- data.frame(Piopre = SLT$'Pio_Pre_Slt', Pio1semana = SLT$`Pio_1_Semana`, Pio1mes = SLT$`Pio_1_Mes`, Pio3mes = SLT$`Pio_3_Mes`)
+evolucion_pio <- evolucion_pio[!is.na(glaucoma$Piopre, glaucoma$Pio1semana, glaucoma$Pio1mes, glaucoma$Pio3mes), ]
+
+
+
