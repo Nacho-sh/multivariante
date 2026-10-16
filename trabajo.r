@@ -81,6 +81,6 @@ medias_largo$momento <- factor(medias_largo$momento,
 ggplot(medias_largo, aes(x = momento, y = media,
                          color = glaucoma, group = glaucoma)) +
   geom_line()
-
+# se observa que hay glaucomas que curan mejor que otros, el GPPA a lo mejor necesita mas tratamiento postop
 
 
