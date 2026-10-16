@@ -48,7 +48,7 @@ SLT$glaucoma[SLT$glaucoma == "GSAA"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA CONGENITO"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA POSTRABECULAR"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "miópico"] <- "otros"
-
+freq(SLT$glaucoma) #los datos quedan mucho mas resumidos
 # podemos estudiar la evolución media del PIO de cada glaucoma a lo largo del tiempo. A menor PIO, mayor mejoría
 #esta parte yo no se hacerla, lo he estado intentando un rato y no termino de entender por que es tan complicada 
 #y larga de hacer. copiado de deepseek
@@ -81,6 +81,19 @@ medias_largo$momento <- factor(medias_largo$momento,
 ggplot(medias_largo, aes(x = momento, y = media,
                          color = glaucoma, group = glaucoma)) +
   geom_line()
-# se observa que hay glaucomas que curan mejor que otros, el GPPA a lo mejor necesita mas tratamiento postop
+# parece que hay glaucomas que curan mejor que otros, el GPPA a lo mejor necesita mas tratamiento postop
+# vamos a ver si existe una correlacion sustancial entre el tipo de glaucoma y la mejoria
+# para justamente esto era el test ANOVA
+
+anova(lm(piopre ~ glaucoma, data = SLT))
+anova(lm(piosem ~ glaucoma, data = SLT))
+anova(lm(piomes ~ glaucoma, data = SLT))
+anova(lm(pio3mes ~ glaucoma, data = SLT))
+# pues no, parece que en ninguno de los grupos podemos rechazar que la media sea distinta en 
+# ningun punto del seguimiento. a los 3 meses estamos a punto de concluir que las medias si que cambian (p=0.058)
+# si nos la jugamos, podemos concluir que las medias cambian. yo no me la jugaria, es un resultado borderline
+
+
+
 
 
