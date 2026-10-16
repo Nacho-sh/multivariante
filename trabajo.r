@@ -7,6 +7,8 @@ library("archdata")
 library("psych")
 library("factoextra")
 library("scatterplot3d")
+library("tidyr")
+
 
 SLT <- read_excel("Tarea_Glaucoma_DB.xlsx", sheet = "SLT")
 
@@ -46,5 +48,39 @@ SLT$glaucoma[SLT$glaucoma == "GSAA"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA CONGENITO"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA POSTRABECULAR"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "miópico"] <- "otros"
+
+# podemos estudiar la evolución media del PIO de cada glaucoma a lo largo del tiempo. A menor PIO, mayor mejoría
+#esta parte yo no se hacerla, lo he estado intentando un rato y no termino de entender por que es tan complicada 
+#y larga de hacer. copiado de deepseek
+medias_evolucion <- data.frame(
+  Pre      = tapply(SLT$piopre,  SLT$glaucoma, mean, na.rm = TRUE), #na.rm ignora los NA
+  Sem1     = tapply(SLT$piosem, SLT$glaucoma, mean, na.rm = TRUE),
+  Mes1     = tapply(SLT$piomes, SLT$glaucoma, mean, na.rm = TRUE),
+  Mes3     = tapply(SLT$pio3mes, SLT$glaucoma, mean, na.rm = TRUE)
+)
+medias_evolucion
+# 1. Convertir rownames a columna
+medias_evolucion$glaucoma <- rownames(medias_evolucion)
+
+# 2. Pasar de ancho a largo con stack() o reshape
+medias_largo <- reshape(
+  medias_evolucion,
+  varying = c("Pre", "Sem1", "Mes1", "Mes3"),
+  v.names = "media",
+  timevar = "momento",
+  times   = c("Pre", "Sem1", "Mes1", "Mes3"),
+  direction = "long"
+)
+
+# 3. Quitar la columna "id" que añade reshape
+medias_largo$id <- NULL
+rownames(medias_largo) <- NULL
+medias_largo
+medias_largo$momento <- factor(medias_largo$momento,
+                               levels = c("Pre", "Sem1", "Mes1", "Mes3"))
+ggplot(medias_largo, aes(x = momento, y = media,
+                         color = glaucoma, group = glaucoma)) +
+  geom_line()
+
 
 
