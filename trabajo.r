@@ -135,13 +135,16 @@ outlier <- function(x) {
   x[x < q1 - H] <- NA
   x[x > q3 + H] <- NA
   x[is.na(x)] <- mean(x, na.rm = TRUE)
+  x
 }
 
 SLT$piopre <- outlier(SLT$piopre)
 SLT$piosem <- outlier(SLT$piosem)
 SLT$piomes <- outlier(SLT$piomes)
 SLT$pio3mes <- outlier(SLT$pio3mes)
-
+SLT$nimpactos <- outlier(SLT$piopre)
+SLT$enertotal <- outlier(SLT$piosem)
+SLT$enerimpac <- outlier(SLT$piomes)
 
 
 ###############################################################################
@@ -162,9 +165,13 @@ SLT$pio3mes <- outlier(SLT$pio3mes)
 #                    IMPORTANTE si las variables tienen escalas distintas.
 #   center = TRUE -> centra en la media.
 ###############################################################################
-
-pca <- prcomp(datos_limpios[, 1:4], scale = TRUE, center = TRUE)
-
+SLT$enerimpac <- as.character(SLT$enerimpac)
+SLT$enerimpac[SLT$enerimpac == ""] <- NA            # vacíos -> NA
+SLT$enerimpac <- gsub(",", ".", SLT$enerimpac)      # comas decimales -> punto
+SLT$enerimpac <- sub("[^0-9.].*$", "", SLT$enerimpac)  # corta desde el primer carácter raro
+SLT$enerimpac <- as.numeric(SLT$enerimpac) #convertimos a numero
+pca <- prcomp(SLT[, c(6,8,9,11:14)], scale = TRUE, center = TRUE) #6,8,9,10-14
+descr(SLT)
 # "rotation": cuánto pesa cada variable original en cada componente (loadings)
 pca$rotation
 
@@ -182,9 +189,28 @@ var_expl
 cum_var <- cumsum(var_expl)
 cum_var
 
+###############################################################################
+# BLOQUE 9. GRÁFICOS DEL PCA
+# -----------------------------------------------------------------------------
+# 1) Varianza explicada por componente (scree plot):
+#    Muestra cuánta info aporta cada componente. Se eligen las que van antes
+#    del "codo" (donde la curva se aplana), o las que superan la media de
+#    varianza (1/nº de variables si estandarizamos).
+#
+# 2) fviz_pca_var: dibuja las VARIABLES como flechas.
+#    - Flechas en la misma dirección = variables correlacionadas positivamente.
+#    - Flechas opuestas = correlación negativa.
+#    - Flechas perpendiculares = poca relación.
+#    - Color "cos2" = calidad de representación (más oscuro = mejor).
+#
+# 3) fviz_pca_ind: dibuja los INDIVIDUOS (filas).
+#    - Puntos cercanos = perfiles parecidos.
+#    - Color "contrib" = cuánto contribuye cada punto a la componente.
+#
+# 4) fviz_pca: biplot, variables + individuos juntos.
+###############################################################################
 
-# graficos de las flechas y eso
-# Screenplot
+# Scree plot
 df_var <- data.frame(pc = 1:length(var_expl), var = var_expl)
 p1 <- ggplot(df_var, aes(x = pc, y = var, fill = var)) +
   geom_col(width = 0.4) +
@@ -234,3 +260,7 @@ fviz_pca(pca, alpha.ind = "contrib", col.var = "cos2",
          gradient.cols = c("#FDF50E", "#FD960E", "#FD1E0E"),
          repel = TRUE, legend.title = "Distancia") +
   theme_bw()
+
+
+
+

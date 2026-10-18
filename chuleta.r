@@ -285,8 +285,7 @@ outlier <- function(x) {
   x[x < q1 - H] <- NA
   x[x > q3 + H] <- NA
   x[is.na(x)] <- mean(x, na.rm = TRUE)
-  # Repetir si aún quedan outliers
-  if (any(x < q1 - H) || any(x > q3 + H)) outlier(x) else x
+  x
 }
 
 # Creamos una copia para no tocar el original
