@@ -28,7 +28,11 @@ SLT$piomes[SLT$piomes == ""] <- NA            # vacíos -> NA
 SLT$piomes <- gsub(",", ".", SLT$piomes)      # comas decimales -> punto
 SLT$piomes <- sub("[^0-9.].*$", "", SLT$piomes)  # corta desde el primer carácter raro
 SLT$piomes <- as.numeric(SLT$piomes) #convertimos a numero
-
+SLT$enerimpac<- as.character(SLT$enerimpac)
+SLT$enerimpac[SLT$enerimpac == ""] <- NA            # vacíos -> NA
+SLT$enerimpac <- gsub(",", ".", SLT$enerimpac)      # comas decimales -> punto
+SLT$enerimpac <- sub("[^0-9.].*$", "", SLT$enerimpac)  # corta desde el primer carácter raro
+SLT$enerimpac <- as.numeric(SLT$enerimpac) #convertimos a numero
 #vamos a ver si tenemos una muestra representativa de los distintos glaucomas o si tenemos que ajustar o descartar
 
 freq(SLT$glaucoma) #salvo 4 tipos de glaucomas, el resto solo tienen menos de tres observaciones, pero si nos fijamos,
@@ -51,6 +55,198 @@ SLT$glaucoma[SLT$glaucoma == "GLAUCOMA CONGENITO"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA POSTRABECULAR"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "miópico"] <- "otros"
 freq(SLT$glaucoma) #los datos quedan mucho mas resumidos
+
+
+
+#VISUALES 
+#En esta parte, dibujamos histogramas, boxplots, diagramas de barras y 'piecharts' para ver como
+# son los SLT con los que estamos trabajando 
+
+
+#1 ojo
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = ojo))+
+  geom_bar() + coord_polar("y") + labs(x = "ojo", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = ojo, fill = ojo)) + geom_bar() + labs(x = "ojo", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#2 Tipo de glaucoma
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `glaucoma`))+
+  geom_bar() + coord_polar("y") + labs(x = "glaucoma", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = "glaucoma", fill = `glaucoma`)) + geom_bar() + labs(x = "glaucoma", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+
+#3 Nº de impactos 
+
+p1 <- ggplot(SLT, aes(x = `nimpactos`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "nimpactos", y = "Densidad") + theme_bw()
+
+p2 <- ggplot(SLT,aes(x = `nimpactos`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "nimpactos", y = "Frecuencia") + theme_bw()
+
+p3 <- ggplot(SLT, aes(x = `nimpactos`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+#4 Cuadrantes
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `cuadrantes`))+
+  geom_bar() + coord_polar("y") + labs(x = "cuadrantes", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `cuadrantes`, fill = `cuadrantes`)) + geom_bar() + labs(x = "CUADRANTES", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#5 enerimpac
+
+p1 <- ggplot(SLT, aes(x = `enerimpac`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "enerimpac", y = "Densidad") + theme_bw()
+
+
+p2 <- ggplot(SLT, aes(x = `enerimpac`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2, nrow = 1, common.legend = FALSE)
+
+
+#6 Energía total
+
+p1 <- ggplot(SLT, aes(x = `enertotal`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "enertotal", y = "Densidad") + theme_bw()
+
+
+p2 <- ggplot(SLT, aes(x = `enertotal`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+p3 <- ggplot(SLT,aes(x = `enertotal`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "enertotal", y = "Frecuencia") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+
+#7 Cirugia previa
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `cirugias`))+
+  geom_bar() + coord_polar("y") + labs(x = "cirugias", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `cirugias`, fill = `cirugias`)) + geom_bar() + labs(x = "cirugias", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#8 PIO PRE STL
+
+p1 <- ggplot(SLT, aes(x = `piopre`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "piopre", y = "Densidad") + theme_bw()
+
+p2 <- ggplot(SLT,aes(x = `piopre`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "piopre", y = "Frecuencia") + theme_bw()
+
+p3 <- ggplot(SLT, aes(x = `piopre`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+#9 piosem
+
+p1 <- ggplot(SLT, aes(x = `piosem`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "piosem", y = "Densidad") + theme_bw()
+
+p2 <- ggplot(SLT,aes(x = `piosem`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "piosem", y = "Frecuencia") + theme_bw()
+
+p3 <- ggplot(SLT, aes(x = `piosem`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+#10 piomes
+
+p1 <- ggplot(SLT, aes(x = `piomes`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "piomes", y = "Densidad") + theme_bw()
+
+p2 <- ggplot(SLT,aes(x = `piomes`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "piomes", y = "Frecuencia") + theme_bw()
+
+p3 <- ggplot(SLT, aes(x = `piomes`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+
+#11 pio3mes
+
+p1 <- ggplot(SLT, aes(x = `pio3mes`))+geom_density(fill = "skyblue", alpha = 0.6) + 
+  labs(title = "Densidad", x = "pio3mes", y = "Densidad") + theme_bw()
+
+p2 <- ggplot(SLT,aes(x = `pio3mes`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
+  labs(title = "Histograma", x = "pio3mes", y = "Frecuencia") + theme_bw()
+
+p3 <- ggplot(SLT, aes(x = `pio3mes`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+  coord_flip() +
+  labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
+
+ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+
+
+#12 Fármacos pre SLT
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `medprev`))+
+  geom_bar() + coord_polar("y") + labs(x = "medprev", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `medprev`, fill = `medprev`)) + geom_bar() + labs(x = "medprev", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#13 Fármacos 1er Mes
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = factor(`medmes`)))+
+  geom_bar() + coord_polar("y") + labs(x = "medmes", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `medmes`, fill = factor(`medmes`))) + geom_bar() + labs(x = "medmes", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#14 Fármacos 3er Mes
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = factor(`med3mes`)))+
+  geom_bar() + coord_polar("y") + labs(x = "med3mes", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `med3mes`, fill = factor(`med3mes`))) + geom_bar() + labs(x = "med3mes", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#15 Dolor
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `dolor`))+
+  geom_bar() + coord_polar("y") + labs(x = "dolor", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `dolor`, fill = `dolor`)) + geom_bar() + labs(x = "dolor", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+#16 sexo
+
+p1 <- ggplot(SLT, aes(x= factor(1), fill = `sexo`))+
+  geom_bar() + coord_polar("y") + labs(x = "sexo", y = "%") + theme_void()
+
+p2 <- ggplot(SLT,aes(x = `sexo`, fill = `sexo`)) + geom_bar() + labs(x = "sexo", y = "Frecuencia")
+
+ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+
+
 # podemos estudiar la evolución media del PIO de cada glaucoma a lo largo del tiempo. A menor PIO, mayor mejoría
 #esta parte yo no se hacerla, lo he estado intentando un rato y no termino de entender por que es tan complicada 
 #y larga de hacer. copiado de deepseek
@@ -170,7 +366,7 @@ SLT$enerimpac[SLT$enerimpac == ""] <- NA            # vacíos -> NA
 SLT$enerimpac <- gsub(",", ".", SLT$enerimpac)      # comas decimales -> punto
 SLT$enerimpac <- sub("[^0-9.].*$", "", SLT$enerimpac)  # corta desde el primer carácter raro
 SLT$enerimpac <- as.numeric(SLT$enerimpac) #convertimos a numero
-pca <- prcomp(SLT[, c(6,8,9,11:14)], scale = TRUE, center = TRUE) #6,8,9,10-14
+pca <- prcomp(SLT[, c(6,8,9,11:14)], scale = TRUE, center = TRUE)
 descr(SLT)
 # "rotation": cuánto pesa cada variable original en cada componente (loadings)
 pca$rotation

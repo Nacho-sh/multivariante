@@ -1,3 +1,3 @@
-Descripción general de las variables que tiene la base de datos (datos cualitativos, datos cuantitativos... (vienen en descripciones al pulsar sobre la variable en Rstudio))
-
-Comprobar porcentaje de evolución del PIO antes y después de la operación, y hacer test de hipótesis si el porcentaje es bajo
+resúmenes, tablas de frecuencias, histogramas, boxplots
+Mejorar la ruleta
+Hacer PIO normal CAT
