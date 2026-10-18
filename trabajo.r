@@ -23,19 +23,21 @@ sapply(SLT, class) #vemos de que tipo es cada variable
 #PIO el 1 mes se pueden convertir a numericos tambien. 
 #es especialmente interesante el PIO al primer mes, asi que vamos a intentar convertirlo, pero antes habra que limpiarlo
 
-SLT$piomes <- gsub("[^0-9.]", "", SLT$piomes) #quitamos todo lo que no sea numeros
-
-SLT$piomes <- as.numeric(SLT$piomes) #ahora convertimos el tipo a numerico sin problemas
+SLT$piomes <- as.character(SLT$piomes)
+SLT$piomes[SLT$piomes == ""] <- NA            # vacíos -> NA
+SLT$piomes <- gsub(",", ".", SLT$piomes)      # comas decimales -> punto
+SLT$piomes <- sub("[^0-9.].*$", "", SLT$piomes)  # corta desde el primer carácter raro
+SLT$piomes <- as.numeric(SLT$piomes) #convertimos a numero
 
 #vamos a ver si tenemos una muestra representativa de los distintos glaucomas o si tenemos que ajustar o descartar
 
 freq(SLT$glaucoma) #salvo 4 tipos de glaucomas, el resto solo tienen menos de tres observaciones, pero si nos fijamos,
 #muchas de las categorias estan simplemente mal introducidas o son diagnosticos dudosos (como el que tiene "?").
 #vamos a optar por limpiar manualmente estas categorias
-SLT$glaucoma[SLT$glaucoma == "GPAA"] <- "GPPA"
-SLT$glaucoma[SLT$glaucoma == "GPAA?"] <- "GPPA"
+SLT$glaucoma[SLT$glaucoma == "GPPA"] <- "GPAA"
+SLT$glaucoma[SLT$glaucoma == "GPAA?"] <- "GPAA"
 SLT$glaucoma[SLT$glaucoma == "SD DISPERSION PIGMENTARIA"] <- "PIGMENTARIO"
-SLT$glaucoma[SLT$glaucoma == "GPAA?miópico"] <- "GPPA"
+SLT$glaucoma[SLT$glaucoma == "GPAA?miópico"] <- "GPAA"
 SLT$glaucoma[SLT$glaucoma == "HTO PIGMENTARI"] <- "PIGMENTARIO"
 SLT$glaucoma[SLT$glaucoma == "GS PXE"] <- "pseudoexfoliativo"
 SLT$glaucoma[SLT$glaucoma == "G.PSEUDOEX"] <- "pseudoexfoliativo"
@@ -59,10 +61,10 @@ medias_evolucion <- data.frame(
   Mes3     = tapply(SLT$pio3mes, SLT$glaucoma, mean, na.rm = TRUE)
 )
 medias_evolucion
-# 1. Convertir rownames a columna
+# Convertir rownames a columna
 medias_evolucion$glaucoma <- rownames(medias_evolucion)
 
-# 2. Pasar de ancho a largo con stack() o reshape
+# Pasar de ancho a largo con stack() o reshape
 medias_largo <- reshape(
   medias_evolucion,
   varying = c("Pre", "Sem1", "Mes1", "Mes3"),
@@ -93,7 +95,142 @@ anova(lm(pio3mes ~ glaucoma, data = SLT))
 # ningun punto del seguimiento. a los 3 meses estamos a punto de concluir que las medias si que cambian (p=0.058)
 # si nos la jugamos, podemos concluir que las medias cambian. yo no me la jugaria, es un resultado borderline
 
+# vamos a dar otro enfoque. veamos si hay outliers en las distintas categorias
+# podemos verlo con los distintos PIO para cada glaucoma
+
+SLT$id <- 1:nrow(SLT)
+
+SLT_largo <- SLT %>%
+  pivot_longer(
+    cols = c(piopre, piosem, piomes, pio3mes),
+    names_to = "momento",
+    values_to = "pio"
+  ) %>%
+  mutate(momento = factor(momento,
+                          levels = c("piopre", "piosem", "piomes", "pio3mes"),
+                          labels = c("Pre", "Sem1", "Mes1", "Mes3")))
+# Densidad por momento
+p1 <- ggplot(SLT_largo, aes(x = pio, fill = momento)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ momento, nrow = 1, scales = "free_y") +
+  labs(x = "PIO (mmHg)", y = "Densidad", title = "Densidad por momento") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# Boxplot por momento
+p2 <- ggplot(SLT_largo, aes(x = momento, y = pio, fill = momento)) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 2) +
+  labs(x = "Momento", y = "PIO (mmHg)", title = "Boxplot por momento") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggarrange(p1, p2, nrow = 2)
+
+
+#vamos a sustituir los outliers por la media en cada momento
+outlier <- function(x) {
+  H  <- 1.5 * IQR(x, na.rm = TRUE)
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  x[x < q1 - H] <- NA
+  x[x > q3 + H] <- NA
+  x[is.na(x)] <- mean(x, na.rm = TRUE)
+}
+
+SLT$piopre <- outlier(SLT$piopre)
+SLT$piosem <- outlier(SLT$piosem)
+SLT$piomes <- outlier(SLT$piomes)
+SLT$pio3mes <- outlier(SLT$pio3mes)
 
 
 
+###############################################################################
+# BLOQUE 8. PCA (ANÁLISIS DE COMPONENTES PRINCIPALES)
+# -----------------------------------------------------------------------------
+# ¿Qué hace el PCA?
+#   Crea NUEVAS variables (componentes) que son combinaciones lineales de las
+#   originales. La 1ª componente (PC1) recoge la mayor varianza posible, la
+#   2ª (PC2) recoge la mayor varianza restante y es perpendicular a PC1, etc.
+#
+# ¿Para qué sirve?
+#   - Reducir muchas variables a unas pocas.
+#   - Ver qué variables van juntas (correlacionadas).
+#   - Visualizar pacientes en 2D.
+#
+# Parámetros:
+#   scale  = TRUE -> estandariza (cada variable media 0, sd 1).
+#                    IMPORTANTE si las variables tienen escalas distintas.
+#   center = TRUE -> centra en la media.
+###############################################################################
 
+pca <- prcomp(datos_limpios[, 1:4], scale = TRUE, center = TRUE)
+
+# "rotation": cuánto pesa cada variable original en cada componente (loadings)
+pca$rotation
+
+# "sdev": desviación típica de cada componente. Al cuadrado = varianza.
+pca$sdev
+
+# Resumen: proporción de varianza explicada por cada componente
+summary(pca)
+
+# Varianza explicada (proporción)
+var_expl <- pca$sdev^2 / sum(pca$sdev^2)
+var_expl
+
+# Varianza acumulada
+cum_var <- cumsum(var_expl)
+cum_var
+
+
+# graficos de las flechas y eso
+# Screenplot
+df_var <- data.frame(pc = 1:length(var_expl), var = var_expl)
+p1 <- ggplot(df_var, aes(x = pc, y = var, fill = var)) +
+  geom_col(width = 0.4) +
+  theme_bw() +
+  labs(x = "Componente principal", y = "Proporción de varianza")
+
+# Varianza acumulada
+df_cum <- data.frame(pc = 1:length(cum_var), cum = cum_var)
+p2 <- ggplot(df_cum, aes(x = pc, y = cum, fill = cum)) +
+  geom_col(width = 0.4) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_bw() +
+  labs(x = "Componente principal", y = "Varianza acumulada")
+
+ggarrange(p1, p2, nrow = 1)
+
+
+# Gráficos de variables (flechas)
+fviz_pca_var(pca, repel = TRUE, col.var = "cos2",
+             legend.title = "cos2", title = "Variables en PC1-PC2") +
+  theme_bw()
+
+fviz_pca_var(pca, axes = c(1, 3), repel = TRUE, col.var = "cos2",
+             title = "Variables en PC1-PC3") +
+  theme_bw()
+
+fviz_pca_var(pca, axes = c(2, 3), repel = TRUE, col.var = "cos2",
+             title = "Variables en PC2-PC3") +
+  theme_bw()
+
+
+# Gráficos de individuos
+fviz_pca_ind(pca, col.ind = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE, legend.title = "Contrib.", title = "Individuos") +
+  theme_bw()
+
+fviz_pca_ind(pca, axes = c(1, 3), col.ind = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE, title = "Individuos PC1-PC3") +
+  theme_bw()
+
+
+# Biplot: variables + individuos
+fviz_pca(pca, alpha.ind = "contrib", col.var = "cos2",
+         col.ind = "seagreen",
+         gradient.cols = c("#FDF50E", "#FD960E", "#FD1E0E"),
+         repel = TRUE, legend.title = "Distancia") +
+  theme_bw()
