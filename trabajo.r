@@ -40,14 +40,15 @@ freq(SLT$glaucoma) #salvo 4 tipos de glaucomas, el resto solo tienen menos de tr
 #vamos a optar por limpiar manualmente estas categorias
 SLT$glaucoma[SLT$glaucoma == "GPPA"] <- "GPAA"
 SLT$glaucoma[SLT$glaucoma == "GPAA?"] <- "GPAA"
+SLT$glaucoma[SLT$glaucoma == "GCS"] <- "GPAA"
 SLT$glaucoma[SLT$glaucoma == "SD DISPERSION PIGMENTARIA"] <- "PIGMENTARIO"
 SLT$glaucoma[SLT$glaucoma == "GPAA?miópico"] <- "GPAA"
 SLT$glaucoma[SLT$glaucoma == "HTO PIGMENTARI"] <- "PIGMENTARIO"
 SLT$glaucoma[SLT$glaucoma == "GS PXE"] <- "pseudoexfoliativo"
 SLT$glaucoma[SLT$glaucoma == "G.PSEUDOEX"] <- "pseudoexfoliativo"
 SLT$glaucoma[SLT$glaucoma == "GLAUCO PIGMENT"] <- "PIGMENTARIO"
-SLT$glaucoma[SLT$glaucoma == "CPAC"] <- "GPAC"
-
+SLT$glaucoma[SLT$glaucoma == "CPAC"] <- "otros"
+SLT$glaucoma[SLT$glaucoma == "GPAC"] <- "otros"
 # por simplicidad y por falta de representacion, podemos agrupar glaucomas poco comunes como el congenito,
 # postrabecular, GSAA o el miopico en una categoria de "otros"
 SLT$glaucoma[SLT$glaucoma == "GSAA"] <- "otros"
@@ -55,13 +56,13 @@ SLT$glaucoma[SLT$glaucoma == "GLAUCOMA CONGENITO"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "GLAUCOMA POSTRABECULAR"] <- "otros"
 SLT$glaucoma[SLT$glaucoma == "miópico"] <- "otros"
 freq(SLT$glaucoma) #los datos quedan mucho mas resumidos
-
-
-
+descr(SLT)
+summary(SLT)
+#TODO: queremos añadir información de summary y descr como la desviacion tipica pero en descr hay demasiados datos
 #VISUALES 
 #En esta parte, dibujamos histogramas, boxplots, diagramas de barras y 'piecharts' para ver como
 # son los SLT con los que estamos trabajando 
-
+SLT
 
 #1 ojo
 
@@ -279,6 +280,7 @@ medias_largo$momento <- factor(medias_largo$momento,
 ggplot(medias_largo, aes(x = momento, y = media,
                          color = glaucoma, group = glaucoma)) +
   geom_line()
+medias_largo
 # parece que hay glaucomas que curan mejor que otros, el GPPA a lo mejor necesita mas tratamiento postop
 # vamos a ver si existe una correlacion sustancial entre el tipo de glaucoma y la mejoria
 # para justamente esto era el test ANOVA
@@ -293,9 +295,9 @@ anova(lm(pio3mes ~ glaucoma, data = SLT))
 
 # vamos a dar otro enfoque. veamos si hay outliers en las distintas categorias
 # podemos verlo con los distintos PIO para cada glaucoma
-
+freq(SLT$glaucoma)
 SLT$id <- 1:nrow(SLT)
-
+# TODO: ver que hacemos con los GCS 
 SLT_largo <- SLT %>%
   pivot_longer(
     cols = c(piopre, piosem, piomes, pio3mes),
