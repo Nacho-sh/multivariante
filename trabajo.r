@@ -62,25 +62,12 @@ summary(SLT)
 #VISUALES 
 #En esta parte, dibujamos histogramas, boxplots, diagramas de barras y 'piecharts' para ver como
 # son los SLT con los que estamos trabajando 
-SLT
-
-#1 ojo
-
-p1 <- ggplot(SLT, aes(x= factor(1), fill = ojo))+
-  geom_bar() + coord_polar("y") + labs(x = "ojo", y = "%") + theme_void()
-
-p2 <- ggplot(SLT,aes(x = ojo, fill = ojo)) + geom_bar() + labs(x = "ojo", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
-
 #2 Tipo de glaucoma
 
 p1 <- ggplot(SLT, aes(x= factor(1), fill = `glaucoma`))+
   geom_bar() + coord_polar("y") + labs(x = "glaucoma", y = "%") + theme_void()
 
-p2 <- ggplot(SLT,aes(x = "glaucoma", fill = `glaucoma`)) + geom_bar() + labs(x = "glaucoma", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+ggarrange(p1,nrow = 1, common.legend = TRUE)
 
 
 #3 Nº de impactos 
@@ -97,26 +84,14 @@ p3 <- ggplot(SLT, aes(x = `nimpactos`)) + geom_boxplot(outlier.colour = "red", o
 
 ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
 
-#4 Cuadrantes
-
-p1 <- ggplot(SLT, aes(x= factor(1), fill = `cuadrantes`))+
-  geom_bar() + coord_polar("y") + labs(x = "cuadrantes", y = "%") + theme_void()
-
-p2 <- ggplot(SLT,aes(x = `cuadrantes`, fill = `cuadrantes`)) + geom_bar() + labs(x = "CUADRANTES", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
-
 #5 enerimpac
 
-p1 <- ggplot(SLT, aes(x = `enerimpac`))+geom_density(fill = "skyblue", alpha = 0.6) + 
-  labs(title = "Densidad", x = "enerimpac", y = "Densidad") + theme_bw()
 
-
-p2 <- ggplot(SLT, aes(x = `enerimpac`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+p1 <- ggplot(SLT, aes(x = `enerimpac`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
   coord_flip() +
   labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
 
-ggarrange(p1,p2, nrow = 1, common.legend = FALSE)
+ggarrange(p1, nrow = 1, common.legend = FALSE)
 
 
 #6 Energía total
@@ -133,30 +108,27 @@ p3 <- ggplot(SLT,aes(x = `enertotal`)) + geom_histogram(bins = 15, fill = "green
   labs(title = "Histograma", x = "enertotal", y = "Frecuencia") + theme_bw()
 
 ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
-
+#TODO: dejamos o quitamos los graficos de nimpactos, enertotal y enerimpac? Tener en cuenta que dependen 
+#funcionalmente dos a uno
 
 #7 Cirugia previa
-
+#TODO: limpiar estos datos y decir que la mayoria son primerizos
 p1 <- ggplot(SLT, aes(x= factor(1), fill = `cirugias`))+
   geom_bar() + coord_polar("y") + labs(x = "cirugias", y = "%") + theme_void()
 
-p2 <- ggplot(SLT,aes(x = `cirugias`, fill = `cirugias`)) + geom_bar() + labs(x = "cirugias", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
+ggarrange(p1,nrow = 1, common.legend = TRUE)
 
 #8 PIO PRE STL
-
+#TODO: meter una raya vertical en 22 y decir que la mayoria si necesitan como minimo tratamiento. Hacer esto para 
+#piosem, piomes, pio3mes
 p1 <- ggplot(SLT, aes(x = `piopre`))+geom_density(fill = "skyblue", alpha = 0.6) + 
   labs(title = "Densidad", x = "piopre", y = "Densidad") + theme_bw()
 
-p2 <- ggplot(SLT,aes(x = `piopre`)) + geom_histogram(bins = 15, fill = "green", color = "white") +
-  labs(title = "Histograma", x = "piopre", y = "Frecuencia") + theme_bw()
-
-p3 <- ggplot(SLT, aes(x = `piopre`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
+p2 <- ggplot(SLT, aes(x = `piopre`)) + geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 3) +
   coord_flip() +
   labs(title = "Boxplot", x = "Valor", y = "") + theme_bw()
 
-ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
+ggarrange(p1,p2, nrow = 1, common.legend = FALSE)
 
 #9 piosem
 
@@ -203,7 +175,7 @@ ggarrange(p1,p2,p3, nrow = 1, common.legend = FALSE)
 
 
 #12 Fármacos pre SLT
-
+#TODO: hablar si quitar todos los graficos de los medicamentos
 p1 <- ggplot(SLT, aes(x= factor(1), fill = `medprev`))+
   geom_bar() + coord_polar("y") + labs(x = "medprev", y = "%") + theme_void()
 
@@ -226,24 +198,6 @@ p1 <- ggplot(SLT, aes(x= factor(1), fill = factor(`med3mes`)))+
   geom_bar() + coord_polar("y") + labs(x = "med3mes", y = "%") + theme_void()
 
 p2 <- ggplot(SLT,aes(x = `med3mes`, fill = factor(`med3mes`))) + geom_bar() + labs(x = "med3mes", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
-
-#15 Dolor
-
-p1 <- ggplot(SLT, aes(x= factor(1), fill = `dolor`))+
-  geom_bar() + coord_polar("y") + labs(x = "dolor", y = "%") + theme_void()
-
-p2 <- ggplot(SLT,aes(x = `dolor`, fill = `dolor`)) + geom_bar() + labs(x = "dolor", y = "Frecuencia")
-
-ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
-
-#16 sexo
-
-p1 <- ggplot(SLT, aes(x= factor(1), fill = `sexo`))+
-  geom_bar() + coord_polar("y") + labs(x = "sexo", y = "%") + theme_void()
-
-p2 <- ggplot(SLT,aes(x = `sexo`, fill = `sexo`)) + geom_bar() + labs(x = "sexo", y = "Frecuencia")
 
 ggarrange(p1,p2,nrow = 1, common.legend = TRUE)
 
@@ -281,6 +235,8 @@ ggplot(medias_largo, aes(x = momento, y = media,
                          color = glaucoma, group = glaucoma)) +
   geom_line()
 medias_largo
+#TODO: añadir el grafico pero para los porcentajes
+#TODO: añadir aclaracion de que pseudoexfoliativo tiene muy pocos datos realmente
 # parece que hay glaucomas que curan mejor que otros, el GPPA a lo mejor necesita mas tratamiento postop
 # vamos a ver si existe una correlacion sustancial entre el tipo de glaucoma y la mejoria
 # para justamente esto era el test ANOVA
@@ -324,15 +280,15 @@ p2 <- ggplot(SLT_largo, aes(x = momento, y = pio, fill = momento)) +
 
 ggarrange(p1, p2, nrow = 2)
 
-
-#vamos a sustituir los outliers por la media en cada momento
+#TODO: aqui se ve que en el mes1 hay una mala medicion porque hay 0 de pio en un unico paciente
+#vamos a sustituir los outliers por el cuartil más próximo en cada momento
 outlier <- function(x) {
   H  <- 1.5 * IQR(x, na.rm = TRUE)
   q1 <- quantile(x, 0.25, na.rm = TRUE)
   q3 <- quantile(x, 0.75, na.rm = TRUE)
-  x[x < q1 - H] <- NA
-  x[x > q3 + H] <- NA
-  x[is.na(x)] <- mean(x, na.rm = TRUE)
+  x[x < q1 - H] <- q1
+  x[x > q3 + H] <- q3
+  x[is.na(x)] <- mean(x, na.rm = TRUE) #TODO: probar a comentar esta linea
   x
 }
 
@@ -343,7 +299,22 @@ SLT$pio3mes <- outlier(SLT$pio3mes)
 SLT$nimpactos <- outlier(SLT$piopre)
 SLT$enertotal <- outlier(SLT$piosem)
 SLT$enerimpac <- outlier(SLT$piomes)
+#TODO: repetir los graficos quitando outliers (ver si lo dejamos o no)
+p1 <- ggplot(SLT_largo, aes(x = pio, fill = momento)) +
+  geom_density(alpha = 0.4) +
+  facet_wrap(~ momento, nrow = 1, scales = "free_y") +
+  labs(x = "PIO (mmHg)", y = "Densidad", title = "Densidad por momento") +
+  theme_bw() +
+  theme(legend.position = "none")
 
+# Boxplot por momento
+p2 <- ggplot(SLT_largo, aes(x = momento, y = pio, fill = momento)) +
+  geom_boxplot(outlier.colour = "red", outlier.shape = 1, outlier.size = 2) +
+  labs(x = "Momento", y = "PIO (mmHg)", title = "Boxplot por momento") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+ggarrange(p1, p2, nrow = 2)
 
 ###############################################################################
 # BLOQUE 8. PCA (ANÁLISIS DE COMPONENTES PRINCIPALES)
@@ -386,7 +357,7 @@ var_expl
 # Varianza acumulada
 cum_var <- cumsum(var_expl)
 cum_var
-
+#TODO: hacer el test del det de la matriz de corr para ver si tiene sentido hacer PCA
 ###############################################################################
 # BLOQUE 9. GRÁFICOS DEL PCA
 # -----------------------------------------------------------------------------
@@ -408,7 +379,7 @@ cum_var
 # 4) fviz_pca: biplot, variables + individuos juntos.
 ###############################################################################
 
-# Scree plot
+# Screenplot
 df_var <- data.frame(pc = 1:length(var_expl), var = var_expl)
 p1 <- ggplot(df_var, aes(x = pc, y = var, fill = var)) +
   geom_col(width = 0.4) +
@@ -438,7 +409,7 @@ fviz_pca_var(pca, axes = c(1, 3), repel = TRUE, col.var = "cos2",
 fviz_pca_var(pca, axes = c(2, 3), repel = TRUE, col.var = "cos2",
              title = "Variables en PC2-PC3") +
   theme_bw()
-
+descr(SLT)
 
 # Gráficos de individuos
 fviz_pca_ind(pca, col.ind = "contrib",
